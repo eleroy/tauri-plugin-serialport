@@ -13,6 +13,7 @@ mod command;
 mod error;
 mod state;
 mod test;
+mod err;
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {

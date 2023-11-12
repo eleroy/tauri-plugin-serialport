@@ -258,7 +258,7 @@ pub fn open<R: Runtime>(
                 .open()
             {
                 Ok(serial) => {
-                    let data = SerialPortInfo {
+                    let data = SerialportInfo {
                         serialport: serial,
                         sender: None,
                     };
