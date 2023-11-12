@@ -9,6 +9,6 @@ exclude = ["/examples", "/webview-dist", "/webview-src", "node_modules"]
 
 [dependencies]
 thiserror = "1.0"
-serialport = {version = "4.2.0"}
 tauri = "1.5.2"
 serde = "1.0.192"
+serialport = { git = "https://github.com/LukaOber/serialport-rs.git", version = "4.2.1-alpha.0" }
