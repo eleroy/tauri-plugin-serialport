@@ -1,15 +1,14 @@
-use crate::error::Error;
+use crate::err::Err;
 use crate::state::{ReadData, SerialportInfo, SerialportState};
-// use std::collections::HashMap;
-use serialport::{DataBits, FlowControl, Parity, StopBits, SerialPortType};
+use serialport::{DataBits, FlowControl, Parity, StopBits, SerialPortInfo, SerialPortType};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::thread;
 use std::time::Duration;
 use tauri::{command, AppHandle, Runtime, State, Window};
 
-fn get_serialport<T, F: FnOnce(&mut SerialPortInfo) -> Result<T, Err>>(
-    state: State<'_, SerialPortState>,
+fn get_serialport<T, F: FnOnce(&mut SerialportInfo) -> Result<T, Err>>(
+    state: State<'_, SerialportState>,
     port_name: String,
     f: F,
 ) -> Result<T, Err> {
@@ -133,7 +132,7 @@ pub fn available_ports() -> Vec<String> {
 pub async fn cancel_read<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
     port_name: String,
 ) -> Result<(), Err> {
     get_serialport(state, port_name.clone(), |serialport_info| {
@@ -156,7 +155,7 @@ pub async fn cancel_read<R: Runtime>(
 pub fn close<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
     port_name: String,
 ) -> Result<(), Err> {
     match state.serialports.lock() {
@@ -177,7 +176,7 @@ pub fn close<R: Runtime>(
 pub fn close_all<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
 ) -> Result<(), Err> {
     match state.serialports.lock() {
         Ok(mut map) => {
@@ -205,7 +204,7 @@ pub fn close_all<R: Runtime>(
 pub fn force_close<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
     port_name: String,
 ) -> Result<(), Err> {
     match state.serialports.lock() {
@@ -235,7 +234,7 @@ pub fn force_close<R: Runtime>(
 #[command]
 pub fn open<R: Runtime>(
     _app: AppHandle<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
     _window: Window<R>,
     port_name: String,
     baud_rate: u32,
@@ -283,7 +282,7 @@ pub fn open<R: Runtime>(
 pub fn read<R: Runtime>(
     _app: AppHandle<R>,
     window: Window<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
     port_name: String,
     timeout: Option<u64>,
     size: Option<usize>,
@@ -350,7 +349,7 @@ pub fn read<R: Runtime>(
 pub fn write<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
     port_name: String,
     value: String,
 ) -> Result<usize, Err> {
@@ -373,7 +372,7 @@ pub fn write<R: Runtime>(
 pub fn write_binary<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialPortState>,
+    state: State<'_, SerialportState>,
     port_name: String,
     value: Vec<u8>,
 ) -> Result<usize, Err> {
