@@ -1,7 +1,7 @@
 use crate::error::Error;
 use crate::state::{ReadData, SerialportInfo, SerialportState};
 // use std::collections::HashMap;
-use serialport::{DataBits, FlowControl, Parity, StopBits};
+use serialport::{DataBits, FlowControl, Parity, StopBits, SerialPortType};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::thread;
@@ -95,14 +95,52 @@ pub fn available_ports() -> Vec<String> {
         Ok(list) => list,
         Err(_) => vec![],
     };
-    list.sort_by(|a, b| a.port_name.cmp(&b.port_name));
-
+    //list.sort_by(|a, b| a.port_name.cmp(&b.port_name));
+/*info.vid, info.pid);
+                        println!(
+                            "     Serial Number: {}",
+                            info.serial_number.as_ref().map_or("", String::as_str)
+                        );
+                        println!(
+                            "      Manufacturer: {}",
+                            info.manufacturer.as_ref().map_or("", String::as_str)
+                        );
+                        println!(
+                            "           Product: {}",
+                            info.product.as_ref().map_or("", String::as_str) */
     let mut name_list: Vec<String> = vec![];
-    for i in &list {
-        name_list.push(i.port_name.clone());
+    for i in list {
+        let port_name = i.port_name;
+        let mut port_info: String = format!("{{'path':'{port_name}'").to_owned();
+        match i.port_type {
+            SerialPortType::UsbPort(info) => {
+                let vid = info.vid;
+                let pid = info.pid;
+                let manufacturer = info.manufacturer.as_ref().map_or("", String::as_str);
+                let serial_number = info.serial_number.as_ref().map_or("", String::as_str);
+                port_info.push_str(&format!(",'vid':'{vid:04x}'"));
+                port_info.push_str(&format!(",'pid':'{pid:04x}'"));
+                port_info.push_str(&format!(",'sn':'{serial_number}'"));
+                port_info.push_str(&format!(",'manufacturer':'{manufacturer}'"));
+                port_info.push_str(&format!(",'type':'usb'"));
+                
+            }
+            SerialPortType::BluetoothPort => {
+                port_info.push_str(&format!(",'type':'bluetooth'"));
+            }
+            SerialPortType::PciPort => {
+                port_info.push_str(&format!(",'type':'PCI'"));
+            }
+            SerialPortType::Unknown => {
+                port_info.push_str(&format!(",'type':'Unknown'"));
+            }
+        }
+        port_info.push_str("}");
+        name_list.push(port_info);
+
     }
 
-    println!("串口列表: {:?}", &name_list);
+    // println!("串口列表: {:?}", &name_list);
 
     name_list
 }
