@@ -312,7 +312,7 @@ pub fn read<R: Runtime>(
                                 TryRecvError::Empty => {}
                             },
                         }
-                        let mut serial_buf: Vec<u8> = vec![0; size.unwrap_or(1024)];
+                        let mut serial_buf: Vec<u8> = vec![0; size.unwrap_or(4096)];
                         match serial.read(serial_buf.as_mut_slice()) {
                             Ok(size) => {
                                 println!("Serial port: {} Read data size: {}", &path, size);
