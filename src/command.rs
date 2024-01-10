@@ -313,27 +313,39 @@ pub fn read<R: Runtime>(
                             },
                         }
                         let mut serial_buf: Vec<u8> = vec![0; size.unwrap_or(4096)];
-                        match serial.read(serial_buf.as_mut_slice()) {
-                            Ok(size) => {
-                                println!("Serial port: {} Read data size: {}", &path, size);
-                                match window.emit(
-                                    &read_event,
-                                    ReadData {
-                                        data: &serial_buf[..size],
-                                        size,
-                                    },
-                                ) {
-                                    Ok(_) => {}
-                                    Err(error) => {
-                                        println!("Failed to send data: {}", error)
-                                    }
+                        loop {
+                            match serial.bytes_to_read() {
+                                Ok(n_bytes)=>{
+                                    if n_bytes==0 {
+                                        break
+                                    };
+                                }
+                                Err(_err) => {
+                                    break
                                 }
                             }
-                            Err(_err) => {
-                                
+                            match serial.read(serial_buf.as_mut_slice()) {
+                                Ok(size) => {
+                                    println!("Serial port: {} Read data size v while: {}", &path, size);
+                                    match window.emit(
+                                        &read_event,
+                                        ReadData {
+                                            data: &serial_buf[..size],
+                                            size,
+                                        },
+                                    ) {
+                                        Ok(_) => {}
+                                        Err(error) => {
+                                            println!("Failed to send data: {}", error)
+                                        }
+                                    }
+                                }
+                                Err(_err) => {
+                                    
+                                }
                             }
-                        }
-                        thread::sleep(Duration::from_millis(timeout.unwrap_or(5)));
+                    }
+                        thread::sleep(Duration::from_millis(timeout.unwrap_or(100)));
                     });
                 }
                 Err(error) => {
