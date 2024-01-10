@@ -333,7 +333,7 @@ pub fn read<R: Runtime>(
                                 
                             }
                         }
-                        thread::sleep(Duration::from_millis(timeout.unwrap_or(200)));
+                        thread::sleep(Duration::from_millis(timeout.unwrap_or(5)));
                     });
                 }
                 Err(error) => {
