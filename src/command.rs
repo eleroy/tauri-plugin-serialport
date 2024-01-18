@@ -345,7 +345,7 @@ pub fn read<R: Runtime>(
                                 }
                             }
                     }
-                        thread::sleep(Duration::from_millis(timeout.unwrap_or(100)));
+                        thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
                     });
                 }
                 Err(error) => {
