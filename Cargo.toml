@@ -4,8 +4,12 @@ version = "0.0.4"
 authors = [ "lzhida","eleroy" ]
 description = "A tauri plugin developed based on Serialport."
 edition = "2021"
-rust-version = "1.57"
+rust-version = "1.70"
 exclude = ["/examples", "/webview-dist", "/webview-src", "node_modules"]
+
+[build-dependencies]
+tauri-plugin = {version = "2.0.0-beta", features = [ "build" ] }
+tauri-build = "2.0.0-beta"
 
 [dependencies]
 thiserror = "1.0"

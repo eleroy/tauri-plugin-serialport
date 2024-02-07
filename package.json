@@ -7,7 +7,7 @@
   "main": "webview-dist/index.js",
   "types": "webview-dist/index.d.ts",
   "scripts": {
-    "build": "rollup -c ./webview-src/rollup.config.js",
+    "build": "rollup -c",
     "prepublishOnly": "yarn build",
     "pretest": "yarn build"
   },
@@ -19,7 +19,7 @@
     "typescript": "4.7.3"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.0.0-alpha.13",
+    "@tauri-apps/api": "^2.0.0-beta",
     "tslib": "^2.1.0"
   }
 }
