@@ -1,6 +1,6 @@
 use crate::err::Err;
 use crate::state::{ReadData, SerialportInfo, SerialportState};
-use serialport::{DataBits, FlowControl, Parity, StopBits, SerialPortInfo, SerialPortType};
+use serialport::{DataBits, FlowControl, Parity, StopBits,  SerialPortType};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::thread;
@@ -74,7 +74,7 @@ fn get_stop_bits(value: Option<usize>) -> StopBits {
 /// `available_ports` 获取串口列表
 #[command]
 pub fn available_ports() -> Vec<String> {
-    let mut list = match serialport::available_ports() {
+    let list = match serialport::available_ports() {
         Ok(list) => list,
         Err(_) => vec![],
     };
@@ -281,8 +281,7 @@ pub fn open<R: Runtime>(
 
 #[command]
 pub fn read<R: Runtime>(
-    _app: AppHandle<R>,
-    window: Window<R>,
+    app: AppHandle<R>,    
     state: State<'_, SerialportState>,
     path: String,
     timeout: Option<u64>,
@@ -297,6 +296,7 @@ pub fn read<R: Runtime>(
             match serialport_info.serialport.try_clone() {
                 Ok(mut serial) => {
                     let read_event = format!("plugin-serialport-read-{}", &path);
+                    print!("{}",&read_event);
                     let (tx, rx): (Sender<usize>, Receiver<usize>) = mpsc::channel();
                     serialport_info.sender = Some(tx);
                     thread::spawn(move || loop {
@@ -328,7 +328,7 @@ pub fn read<R: Runtime>(
                             match serial.read(serial_buf.as_mut_slice()) {
                                 Ok(size) => {
                                     println!("Serial port: {} Read data size v while: {}", &path, size);
-                                    match window.emit(
+                                    match app.emit(
                                         &read_event,
                                         ReadData {
                                             data: &serial_buf[..size],

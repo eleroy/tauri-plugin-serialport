@@ -29,7 +29,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             write,
             write_binary,
         ])
-        .setup(move |app_handle, api| {
+        .setup(move |app_handle, _api| {
             app_handle.manage(SerialportState {
                 serialports: Arc::new(Mutex::new(HashMap::new())),
             });
