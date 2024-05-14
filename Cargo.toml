@@ -16,4 +16,4 @@ tauri-build = "2.0.0-beta"
 thiserror = "1.0"
 tauri = { version = "2.0.0-beta", features = [] }
 serde = "1.0.192"
-serialport = { git = "https://github.com/LukaOber/serialport-rs.git", version = "4.2.1-alpha.0" }
+serialport = "4.3.0"
