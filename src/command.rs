@@ -295,6 +295,7 @@ pub fn read<R: Runtime>(
             println!("Start reading data from serial port: {}", &path);
             match serialport_info.serialport.try_clone() {
                 Ok(mut serial) => {
+                    let _ = serial.write_data_terminal_ready(true);
                     let read_event = format!("plugin-serialport-read-{}", &path);
                     print!("{}",&read_event);
                     let (tx, rx): (Sender<usize>, Receiver<usize>) = mpsc::channel();
