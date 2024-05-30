@@ -303,7 +303,9 @@ pub fn read<R: Runtime>(
                     serialport_info.sender = Some(tx);
                     thread::spawn(move || loop {
                         match rx.try_recv() {
-                            Ok(_) => {
+                            Ok(_) => {                                
+                                let _ = serial.write_data_terminal_ready(false);
+                                let _ = serial.write_request_to_send(false);
                                 println!("Stop reading data from serial port: {}", &path);
                                 break;
                             }
