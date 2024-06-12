@@ -30,7 +30,8 @@ interface Options {
   flowControl: null | 'Software' | 'Hardware';
   parity: null | 'Odd' | 'Even';
   stopBits: 1 | 2;
-  timeout: number;
+  timeout: null | number;
+  dtr: null | boolean,
   [key: string]: any;
 }
 
@@ -57,6 +58,7 @@ class Serialport {
       parity: options.parity || null,
       stopBits: options.stopBits || 2,
       timeout: options.timeout || 200,
+      dtr:false,
     };
     this.size = options.size || 1024;
   }

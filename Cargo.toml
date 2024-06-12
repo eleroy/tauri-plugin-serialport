@@ -16,4 +16,4 @@ tauri-build = "2.0.0-beta"
 thiserror = "1.0"
 tauri = { version = "2.0.0-beta", features = [] }
 serde = "1.0.192"
-serialport = "4.3.0"
+serialport = {version="4.3.0", features=["serde"]}

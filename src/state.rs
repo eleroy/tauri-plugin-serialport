@@ -6,20 +6,15 @@ use std::{
 };
 
 #[derive(Default)]
-pub struct SerialportState {
+pub struct SerialPortState {
     // plugin state, configuration fields
-    pub serialports: Arc<Mutex<HashMap<String, SerialportInfo>>>,
+    pub serialports: Arc<Mutex<HashMap<String, SerialPortStateInfo>>>,
 }
-pub struct SerialportInfo {
+pub struct SerialPortStateInfo {
     pub serialport: Box<dyn SerialPort>,
     pub sender: Option<Sender<usize>>,
 }
 
-#[derive(Serialize, Clone)]
-pub struct InvokeResult {
-    pub code: i32,
-    pub message: String,
-}
 
 #[derive(Serialize, Clone)]
 pub struct ReadData<'a> {

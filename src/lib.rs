@@ -4,16 +4,14 @@ use tauri::{
 };
 
 use command::{available_ports, cancel_read, close, close_all, force_close, open, read, write, write_binary};
-use state::SerialportState;
+use state::SerialPortState;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
 mod command;
-mod error;
 mod state;
-mod test;
-mod err;
+mod error;
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
@@ -30,7 +28,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             write_binary,
         ])
         .setup(move |app_handle, _api| {
-            app_handle.manage(SerialportState {
+            app_handle.manage(SerialPortState {
                 serialports: Arc::new(Mutex::new(HashMap::new())),
             });
             Ok(())

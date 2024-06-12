@@ -1,147 +1,55 @@
-use crate::err::Err;
-use crate::state::{ReadData, SerialportInfo, SerialportState};
-use serialport::{DataBits, FlowControl, Parity, StopBits,  SerialPortType};
+use crate::error::Error;
+use crate::state::{ReadData, SerialPortState, SerialPortStateInfo};
+use serialport::{DataBits, FlowControl, Parity, SerialPortInfo, StopBits};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::thread;
 use std::time::Duration;
-use tauri::{command, AppHandle, Runtime, State, Window};
 use tauri::Manager;
+use tauri::{command, AppHandle, Runtime, State, Window};
 
-fn get_serialport<T, F: FnOnce(&mut SerialportInfo) -> Result<T, Err>>(
-    state: State<'_, SerialportState>,
+fn get_serialport<T, F: FnOnce(&mut SerialPortStateInfo) -> Result<T, Error>>(
+    state: State<'_, SerialPortState>,
     path: String,
     f: F,
-) -> Result<T, Err> {
+) -> Result<T, Error> {
     match state.serialports.lock() {
         Ok(mut map) => match map.get_mut(&path) {
             Some(serialport_info) => f(serialport_info),
-            None => {
-                Err(Err::String("Serial Port not found!".to_string()))
-            }
+            None => Err(Error::String("Serial Port not found!".to_string())),
         },
-        Err(error) =>  Err(Err::String(format!("Failed to acquire file lock! {} ", error))),
+        Err(error) => Err(Error::String(format!(
+            "Failed to acquire file lock! {} ",
+            error
+        ))),
     }
 }
 
-fn get_data_bits(value: Option<usize>) -> DataBits {
-    match value {
-        Some(value) => match value {
-            5 => DataBits::Five,
-            6 => DataBits::Six,
-            7 => DataBits::Seven,
-            8 => DataBits::Eight,
-            _ => DataBits::Eight,
-        },
-        None => DataBits::Eight,
-    }
-}
-
-fn get_flow_control(value: Option<String>) -> FlowControl {
-    match value {
-        Some(value) => match value.as_str() {
-            "Software" => FlowControl::Software,
-            "Hardware" => FlowControl::Hardware,
-            _ => FlowControl::None,
-        },
-        None => FlowControl::None,
-    }
-}
-
-fn get_parity(value: Option<String>) -> Parity {
-    match value {
-        Some(value) => match value.as_str() {
-            "Odd" => Parity::Odd,
-            "Even" => Parity::Even,
-            _ => Parity::None,
-        },
-        None => Parity::None,
-    }
-}
-
-fn get_stop_bits(value: Option<usize>) -> StopBits {
-    match value {
-        Some(value) => match value {
-            1 => StopBits::One,
-            2 => StopBits::Two,
-            _ => StopBits::Two,
-        },
-        None => StopBits::Two,
-    }
-}
-
-
-/// `available_ports` 获取串口列表
+/// `available_ports`
 #[command]
-pub fn available_ports() -> Vec<String> {
-    let list = match serialport::available_ports() {
+pub fn available_ports() -> Vec<SerialPortInfo> {
+    match serialport::available_ports() {
         Ok(list) => list,
         Err(_) => vec![],
-    };
-    //list.sort_by(|a, b| a.port_name.cmp(&b.port_name));
-/*info.vid, info.pid);
-                        println!(
-                            "     Serial Number: {}",
-                            info.serial_number.as_ref().map_or("", String::as_str)
-                        );
-                        println!(
-                            "      Manufacturer: {}",
-                            info.manufacturer.as_ref().map_or("", String::as_str)
-                        );
-                        println!(
-                            "           Product: {}",
-                            info.product.as_ref().map_or("", String::as_str) */
-    let mut name_list: Vec<String> = vec![];
-    for i in list {
-        let port_name = i.port_name;
-        let mut port_info: String = format!("{{'path':'{port_name}'").to_owned();
-        match i.port_type {
-            SerialPortType::UsbPort(info) => {
-                let vid = info.vid;
-                let pid = info.pid;
-                let manufacturer = info.manufacturer.as_ref().map_or("", String::as_str);
-                let serial_number = info.serial_number.as_ref().map_or("", String::as_str);
-                port_info.push_str(&format!(",'vid':'{vid:04x}'"));
-                port_info.push_str(&format!(",'pid':'{pid:04x}'"));
-                port_info.push_str(&format!(",'sn':'{serial_number}'"));
-                port_info.push_str(&format!(",'manufacturer':'{manufacturer}'"));
-                port_info.push_str(&format!(",'type':'usb'"));
-                
-            }
-            SerialPortType::BluetoothPort => {
-                port_info.push_str(&format!(",'type':'bluetooth'"));
-            }
-            SerialPortType::PciPort => {
-                port_info.push_str(&format!(",'type':'PCI'"));
-            }
-            SerialPortType::Unknown => {
-                port_info.push_str(&format!(",'type':'Unknown'"));
-            }
-        }
-        port_info.push_str("}");
-        name_list.push(port_info);
-
     }
-
-    // println!("串口列表: {:?}", &name_list);
-
-    name_list
 }
-
 
 #[command]
 pub async fn cancel_read<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialportState>,
+    state: State<'_, SerialPortState>,
     path: String,
-) -> Result<(), Err> {
+) -> Result<(), Error> {
     get_serialport(state, path.clone(), |serialport_info| {
         match &serialport_info.sender {
             Some(sender) => match sender.send(1) {
                 Ok(_) => {}
                 Err(error) => {
-                    return Err(Err::String(format!("Failed to cancel serial port reading data: {}", error)));
+                    return Err(Error::String(format!(
+                        "Failed to cancel serial port reading data: {}",
+                        error
+                    )));
                 }
             },
             None => {}
@@ -156,20 +64,19 @@ pub async fn cancel_read<R: Runtime>(
 pub fn close<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialportState>,
+    state: State<'_, SerialPortState>,
     path: String,
-) -> Result<(), Err> {
+) -> Result<(), Error> {
     match state.serialports.lock() {
         Ok(mut serialports) => {
-            if serialports.remove(&path).is_some() {
+            let serial = serialports.remove(&path);
+            if serial.is_some() {
                 Ok(())
             } else {
-                Err(Err::String(format!("Serial port {} not opened!", &path)))
+                Err(Error::String(format!("Serial port {} not opened!", &path)))
             }
         }
-        Err(error) => {
-            Err(Err::String(format!("Failed to acquire lock: {}", error)))
-        }
+        Err(error) => Err(Error::String(format!("Failed to acquire lock: {}", error))),
     }
 }
 
@@ -177,8 +84,8 @@ pub fn close<R: Runtime>(
 pub fn close_all<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialportState>,
-) -> Result<(), Err> {
+    state: State<'_, SerialPortState>,
+) -> Result<(), Error> {
     match state.serialports.lock() {
         Ok(mut map) => {
             for serialport_info in map.values() {
@@ -187,7 +94,10 @@ pub fn close_all<R: Runtime>(
                         Ok(_) => {}
                         Err(error) => {
                             println!("Failed to cancel serial port reading data: {}", error);
-                            return Err(Err::String(format!("Failed to cancel serial port reading data: {}", error)));
+                            return Err(Error::String(format!(
+                                "Failed to cancel serial port reading data: {}",
+                                error
+                            )));
                         }
                     }
                 }
@@ -195,9 +105,7 @@ pub fn close_all<R: Runtime>(
             map.clear();
             Ok(())
         }
-        Err(error) => {
-            Err(Err::String(format!("Failed to acquire lock: {}", error)))
-        }
+        Err(error) => Err(Error::String(format!("Failed to acquire lock: {}", error))),
     }
 }
 
@@ -205,9 +113,9 @@ pub fn close_all<R: Runtime>(
 pub fn force_close<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialportState>,
+    state: State<'_, SerialPortState>,
     path: String,
-) -> Result<(), Err> {
+) -> Result<(), Error> {
     match state.serialports.lock() {
         Ok(mut map) => {
             if let Some(serial) = map.get_mut(&path) {
@@ -216,7 +124,10 @@ pub fn force_close<R: Runtime>(
                         Ok(_) => {}
                         Err(error) => {
                             println!("Failed to cancel serial port reading data: {}", error);
-                            return Err(Err::String(format!("Failed to cancel serial port reading data: {}", error)));
+                            return Err(Error::String(format!(
+                                "Failed to cancel serial port reading data: {}",
+                                error
+                            )));
                         }
                     }
                 }
@@ -226,67 +137,66 @@ pub fn force_close<R: Runtime>(
                 Ok(())
             }
         }
-        Err(error) => {
-            Err(Err::String(format!("Failed to acquire lock: {}", error)))
-        }
+        Err(error) => Err(Error::String(format!("Failed to acquire lock: {}", error))),
     }
 }
 
 #[command]
 pub fn open<R: Runtime>(
     _app: AppHandle<R>,
-    state: State<'_, SerialportState>,
+    state: State<'_, SerialPortState>,
     _window: Window<R>,
     path: String,
     baud_rate: u32,
-    data_bits: Option<usize>,
-    flow_control: Option<String>,
-    parity: Option<String>,
-    stop_bits: Option<usize>,
+    data_bits: Option<DataBits>,
+    flow_control: Option<FlowControl>,
+    parity: Option<Parity>,
+    stop_bits: Option<StopBits>,
+    dtr: Option<bool>,
     timeout: Option<u64>,
-) -> Result<(), Err> {
+) -> Result<(), Error> {
     match state.serialports.lock() {
         Ok(mut serialports) => {
             if serialports.contains_key(&path) {
-                return Err(Err::String(format!("Serial port {} not opened!", path)));
+                return Err(Error::String(format!("Serial port {} not opened!", path)));
             }
             match serialport::new(path.clone(), baud_rate)
-                .data_bits(get_data_bits(data_bits))
-                .flow_control(get_flow_control(flow_control))
-                .parity(get_parity(parity))
-                .stop_bits(get_stop_bits(stop_bits))
+                .data_bits(data_bits.unwrap_or(DataBits::Eight))
+                .flow_control(flow_control.unwrap_or(FlowControl::None))
+                .parity(parity.unwrap_or(Parity::None))
+                .stop_bits(stop_bits.unwrap_or(StopBits::Two))
                 .timeout(Duration::from_millis(timeout.unwrap_or(200)))
                 .open()
             {
                 Ok(serial) => {
-                    let data = SerialportInfo {
+                    let mut data = SerialPortStateInfo {
                         serialport: serial,
                         sender: None,
                     };
+                    let _ = data
+                        .serialport
+                        .write_data_terminal_ready(dtr.unwrap_or(false));
                     serialports.insert(path, data);
                     Ok(())
                 }
-                Err(error) => Err(Err::String(format!(
+                Err(error) => Err(Error::String(format!(
                     "Access serial port {} failed: {}",
-                    path,
-                    error.description
+                    path, error.description
                 ))),
             }
         }
-        Err(error) => {
-            Err(Err::String(format!("Failed to acquire lock: {}", error)))
-        }
+        Err(error) => Err(Error::String(format!("Failed to acquire lock: {}", error))),
     }
 }
 
 #[command]
 pub fn read<R: Runtime>(
-    app: AppHandle<R>,    
-    state: State<'_, SerialportState>,
+    app: AppHandle<R>,
+    state: State<'_, SerialPortState>,
     path: String,
     timeout: Option<u64>,
     size: Option<usize>,
-) -> Result<(), Err> {
+) -> Result<(), Error> {
     get_serialport(state.clone(), path.clone(), |serialport_info| {
         if serialport_info.sender.is_some() {
             println!("Already reading data from serial port: {}", &path);
@@ -298,14 +208,12 @@ pub fn read<R: Runtime>(
                     let _ = serial.write_data_terminal_ready(true);
                     let _ = serial.write_request_to_send(true);
                     let read_event = format!("plugin-serialport-read-{}", &path);
-                    print!("{}",&read_event);
+                    print!("{}", &read_event);
                     let (tx, rx): (Sender<usize>, Receiver<usize>) = mpsc::channel();
                     serialport_info.sender = Some(tx);
                     thread::spawn(move || loop {
                         match rx.try_recv() {
-                            Ok(_) => {                                
-                                let _ = serial.write_data_terminal_ready(false);
-                                let _ = serial.write_request_to_send(false);
+                            Ok(_) => {
                                 println!("Stop reading data from serial port: {}", &path);
                                 break;
                             }
@@ -320,18 +228,19 @@ pub fn read<R: Runtime>(
                         let mut serial_buf: Vec<u8> = vec![0; size.unwrap_or(4096)];
                         loop {
                             match serial.bytes_to_read() {
-                                Ok(n_bytes)=>{
-                                    if n_bytes==0 {
-                                        break
+                                Ok(n_bytes) => {
+                                    if n_bytes == 0 {
+                                        break;
                                     };
                                 }
-                                Err(_err) => {
-                                    break
-                                }
+                                Err(_err) => break,
                             }
                             match serial.read(serial_buf.as_mut_slice()) {
                                 Ok(size) => {
-                                    println!("Serial port: {} Read data size v while: {}", &path, size);
+                                    println!(
+                                        "Serial port: {} Read data size v while: {}",
+                                        &path, size
+                                    );
                                     match app.emit(
                                         &read_event,
                                         ReadData {
@@ -345,16 +254,17 @@ pub fn read<R: Runtime>(
                                         }
                                     }
                                 }
-                                Err(_err) => {
-                                    
-                                }
+                                Err(_err) => {}
                             }
-                    }
+                        }
                         thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
                     });
                 }
                 Err(error) => {
-                    return Err(Err::String(format!("Reading from {} failed: {}", &path, error)));
+                    return Err(Error::String(format!(
+                        "Reading from {} failed: {}",
+                        &path, error
+                    )));
                 }
             }
             Ok(())
@@ -366,22 +276,19 @@ pub fn read<R: Runtime>(
 pub fn write<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialportState>,
+    state: State<'_, SerialPortState>,
     path: String,
     value: String,
-) -> Result<usize, Err> {
-    get_serialport(state, path.clone(), |serialport_info| {
-        match serialport_info.serialport.write(value.as_bytes()) {
-            Ok(size) => {
-                Ok(size)
-        }
-            Err(error) => {
-                Err(Err::String(format!(
-                    "Write to serial port: {} failed: {}",
-                    &path, error
-                )))
-            }
-        }
+) -> Result<usize, Error> {
+    get_serialport(state, path.clone(), |serialport_info| match serialport_info
+        .serialport
+        .write(value.as_bytes())
+    {
+        Ok(size) => Ok(size),
+        Err(error) => Err(Error::String(format!(
+            "Write to serial port: {} failed: {}",
+            &path, error
+        ))),
     })
 }
 
@@ -389,22 +296,18 @@ pub fn write<R: Runtime>(
 pub fn write_binary<R: Runtime>(
     _app: AppHandle<R>,
     _window: Window<R>,
-    state: State<'_, SerialportState>,
+    state: State<'_, SerialPortState>,
     path: String,
     value: Vec<u8>,
-) -> Result<usize, Err> {
+) -> Result<usize, Error> {
     get_serialport(state, path.clone(), |serialport_info| match serialport_info
         .serialport
         .write(&value)
     {
-        Ok(size) => {
-            Ok(size)
-        }
-        Err(error) => {
-            Err(Err::String(format!(
-                "Write to serial port: {} failed: {}",
-                &path, error
-            )))
-        }
+        Ok(size) => Ok(size),
+        Err(error) => Err(Error::String(format!(
+            "Write to serial port: {} failed: {}",
+            &path, error
+        ))),
     })
 }
