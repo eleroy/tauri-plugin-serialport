@@ -1,6 +1,16 @@
 # Tauri Plugin serialport
 
-A tauri plugin developed based on Serialport.
+This plugin is based on the plugin developped by lzhida. https://github.com/lzhida/tauri-plugin-serialport.
+
+A lot of the API is similar, but it differs on few aspects:
+- It should be used with tauri v2 and is incompatible withe tauri v1
+- It uses the structures from serialport-rs and does not implement custom structures
+- Chinese comment or messages have been translated or removed.
+- It includes additional features:
+  - Possibility to set DTR (for some CDC devices such as Raspberry pico)
+  - list_available_ports returns a rich structure including vid, pid, serial number
+  - The reading section has been reworked so that it can read long messages before sending them to the frontend resulting overall on faster read time
+
 
 ## Installation
 
@@ -12,14 +22,14 @@ There are three general methods of installation that we can recommend.
 
 For more details and usage see the example app. Please note, below in the dependencies you can also lock to a revision/tag in both the `Cargo.toml` and `package.json`
 
-### RUST
+### Rust
 
 `src-tauri/Cargo.toml`
 
 ```toml
 [dependencies.tauri-plugin-serialport]
-git = "https://github.com/lzhida/tauri-plugin-serialport"
-tag = "v0.1.0"
+git = "https://github.com/eleroy/tauri-plugin-serialport"
+version = "v0.1.0"
 ```
 
 Use in `src-tauri/src/main.rs`:
@@ -35,34 +45,29 @@ fn main() {
 }
 ```
 
-### WEBVIEW
+### JS
 
-`Install from a tagged release`
 
 ```
-npm install github:lzhida/tauri-plugin-serialport#v0.1.0
+npm install https://github.com/eleroy/tauri-plugin-serialport
 # or
-yarn add github:lzhida/tauri-plugin-serialport#v0.1.0
+yarn add https://github.com/eleroy/tauri-plugin-serialport
 ```
 
-`Install from a branch (dev)`
-
-```
-npm install https://github.com/lzhida/tauri-plugin-serialport\#master
-# or
-yarn add https://github.com/lzhida/tauri-plugin-serialport\#master
-```
-
-`package.json`
-
-```json
-  "dependencies": {
-    "tauri-plugin-serialport-api": "github:lzhida/tauri-plugin-serialport#v0.1.0",
-  }
-```
+## USAGE
 
 Use within your JS/TS:
 
-```JS
-import { open } from 'tauri-plugin-serialport-api';
+```TS
+import { SerialPort } from 'tauri-plugin-serialport-api';
+const availablePorts = await SerialPort.available_ports()
+console.log(availablePorts)
+const serialPort = new SerialPort(
+  {
+    path: availablePorts[0].port_name, 
+    baudRate:115200, 
+    dtr:true
+  })
+await serialPort.open()
+serialPort.listen((data) => console.log(data), decode=true)
 ```

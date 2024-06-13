@@ -18,17 +18,7 @@ export interface UsbPort {
   vid: number;
 }
 
-export interface InvokeResult {
-  code: number;
-  message: string;
-}
-
-export interface ReadDataResult {
-  size: number;
-  data: number[];
-}
-
-export interface SerialportOptions {
+export interface SerialPortOptions {
   path: string;
   baudRate: number;
   encoding?: string;
@@ -39,31 +29,19 @@ export interface SerialportOptions {
   dtr?: boolean;
   timeout?: number;
   size?: number;
-  [key: string]: any;
-}
-
-interface Options {
-  dataBits: "Five" | "Six" | "Seven" | "Eight";
-  flowControl: "None" | "Software" | "Hardware";
-  parity: "None" | "Odd" | "Even";
-  stopBits: "One" | "Two";
-  dtr: null | boolean;
-  timeout: null | number;
-  [key: string]: any;
 }
 
 interface ReadOptions {
   timeout?: number;
-  size?: number;
 }
 
-class Serialport {
+class SerialPort {
   isOpen: boolean;
   unListen?: UnlistenFn;
   encoding: string;
-  options: Options;
+  options: SerialPortOptions;
 
-  constructor(options: SerialportOptions) {
+  constructor(options: SerialPortOptions) {
     this.isOpen = false;
     this.encoding = options.encoding || "utf-8";
     this.options = {
@@ -170,7 +148,7 @@ class Serialport {
 
   /**
    * @description: Close current port
-   * @return {Promise<InvokeResult>}
+   * @return {Promise<void>}
    */
   async close(): Promise<void> {
     try {
@@ -195,13 +173,13 @@ class Serialport {
    * @param {function} fn
    * @return {Promise<void>}
    */
-  async listen(fn: (...args: any[]) => void, isDecode = true): Promise<void> {
+  async listen(fn: (...args: any[]) => void, decode = true): Promise<void> {
     try {
       await this.cancelListen();
       let readEvent = "plugin-serialport-read-" + this.options.path;
       this.unListen = await listen<number[]>(readEvent, ({ payload }) => {
         try {
-          if (isDecode) {
+          if (decode) {
             const decoder = new TextDecoder(this.encoding);
             const data = decoder.decode(new Uint8Array(payload));
             fn(data);
@@ -355,4 +333,4 @@ class Serialport {
   }
 }
 
-export { Serialport };
+export { SerialPort as Serialport };

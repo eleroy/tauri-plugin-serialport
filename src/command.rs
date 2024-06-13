@@ -1,12 +1,41 @@
-use crate::error::Error;
-use crate::state::{SerialPortState, SerialPortStateInfo};
+use serde::{Serialize, Serializer};
+use serialport::{self, SerialPort};
 use serialport::{DataBits, FlowControl, Parity, SerialPortInfo, StopBits};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::thread;
 use std::time::Duration;
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 use tauri::Manager;
 use tauri::{command, AppHandle, Runtime, State, Window};
+
+#[derive(Default)]
+pub struct SerialPortState {
+    // plugin state, configuration fields
+    pub serialports: Arc<Mutex<HashMap<String, SerialPortStateInfo>>>,
+}
+pub struct SerialPortStateInfo {
+    pub serialport: Box<dyn SerialPort>,
+    pub sender: Option<Sender<usize>>,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("{0}")]
+    String(String),
+}
+
+impl Serialize for Error {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.to_string().as_ref())
+    }
+}
 
 fn get_serialport<T, F: FnOnce(&mut SerialPortStateInfo) -> Result<T, Error>>(
     state: State<'_, SerialPortState>,
