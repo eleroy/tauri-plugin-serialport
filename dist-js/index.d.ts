@@ -23,7 +23,6 @@ export interface SerialPortOptions {
     stopBits?: "One" | "Two";
     dtr?: boolean;
     timeout?: number;
-    size?: number;
 }
 interface ReadOptions {
     timeout?: number;
