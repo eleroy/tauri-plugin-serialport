@@ -232,7 +232,6 @@ pub fn read<R: Runtime>(
                                 };
                                 println!("Pending bytes: {}", pending_bytes);
                                 serial_buf.resize(pending_bytes + serial_buf.len(), 0);
-                                let mut serial_buf: Vec<u8> = vec![0; pending_bytes];
                                 let serial_buf_len = serial_buf.len();
                                 match serial
                                     .read(&mut serial_buf[(serial_buf_len - pending_bytes)..])
