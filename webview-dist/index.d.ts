@@ -25,19 +25,20 @@ export interface SerialportOptions {
     path: string;
     baudRate: number;
     encoding?: string;
-    dataBits?: 5 | 6 | 7 | 8;
-    flowControl?: null | 'Software' | 'Hardware';
-    parity?: null | 'Odd' | 'Even';
-    stopBits?: 1 | 2;
+    dataBits?: "Five" | "Six" | "Seven" | "Eight";
+    flowControl?: "None" | 'Software' | 'Hardware';
+    parity?: "None" | 'Odd' | 'Even';
+    stopBits?: "One" | "Two";
+    dtr?: boolean;
     timeout?: number;
     size?: number;
     [key: string]: any;
 }
 interface Options {
-    dataBits: 5 | 6 | 7 | 8;
-    flowControl: null | 'Software' | 'Hardware';
-    parity: null | 'Odd' | 'Even';
-    stopBits: 1 | 2;
+    dataBits: "Five" | "Six" | "Seven" | "Eight";
+    flowControl: "None" | 'Software' | 'Hardware';
+    parity: "None" | 'Odd' | 'Even';
+    stopBits: "One" | "Two";
     dtr: null | boolean;
     timeout: null | number;
     [key: string]: any;

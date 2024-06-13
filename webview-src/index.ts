@@ -34,20 +34,21 @@ export interface SerialportOptions {
   path: string;
   baudRate: number;
   encoding?: string;
-  dataBits?: 5 | 6 | 7 | 8;
-  flowControl?: null | 'Software' | 'Hardware';
-  parity?: null | 'Odd' | 'Even';
-  stopBits?: 1 | 2;
+  dataBits?: "Five" | "Six" | "Seven" | "Eight";
+  flowControl?: "None" | 'Software' | 'Hardware';
+  parity?: "None" | 'Odd' | 'Even';
+  stopBits?: "One" | "Two";
+  dtr?: boolean;
   timeout?: number;
   size?: number;
   [key: string]: any;
 }
 
 interface Options {
-  dataBits: 5 | 6 | 7 | 8;
-  flowControl: null | 'Software' | 'Hardware';
-  parity: null | 'Odd' | 'Even';
-  stopBits: 1 | 2;  
+  dataBits: "Five" | "Six" | "Seven" | "Eight";
+  flowControl: "None" | 'Software' | 'Hardware';
+  parity: "None" | 'Odd' | 'Even';
+  stopBits: "One" | "Two";  
   dtr: null | boolean;
   timeout: null | number;
   [key: string]: any;
@@ -71,10 +72,10 @@ class Serialport {
     this.options = {
       path: options.path,
       baudRate: options.baudRate,
-      dataBits: options.dataBits || 8,
-      flowControl: options.flowControl || null,
-      parity: options.parity || null,
-      stopBits: options.stopBits || 2,
+      dataBits: options.dataBits || "Eight",
+      flowControl: options.flowControl || "None",
+      parity: options.parity || "None",
+      stopBits: options.stopBits || "Two",
       dtr:false,
       timeout: options.timeout || 200,      
     };
