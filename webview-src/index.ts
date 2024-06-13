@@ -47,9 +47,9 @@ interface Options {
   dataBits: 5 | 6 | 7 | 8;
   flowControl: null | 'Software' | 'Hardware';
   parity: null | 'Odd' | 'Even';
-  stopBits: 1 | 2;
+  stopBits: 1 | 2;  
+  dtr: null | boolean;
   timeout: null | number;
-  dtr: null | boolean,
   [key: string]: any;
 }
 
@@ -75,8 +75,8 @@ class Serialport {
       flowControl: options.flowControl || null,
       parity: options.parity || null,
       stopBits: options.stopBits || 2,
-      timeout: options.timeout || 200,
       dtr:false,
+      timeout: options.timeout || 200,      
     };
     this.size = options.size || 1024;
   }
@@ -244,7 +244,8 @@ class Serialport {
         flowControl: this.options.flowControl,
         parity: this.options.parity,
         stopBits: this.options.stopBits,
-        timeout: this.options.timeout,
+        dtr:this.options.dtr,
+        timeout: this.options.timeout,        
       });
       this.isOpen = true;
       return Promise.resolve(res);
@@ -263,7 +264,6 @@ class Serialport {
       return await invoke<void>('plugin:serialport|read', {
         path: this.options.path,
         timeout: options?.timeout || this.options.timeout,
-        size: options?.size || this.size,
       });
     } catch (error) {
       return Promise.reject(error);

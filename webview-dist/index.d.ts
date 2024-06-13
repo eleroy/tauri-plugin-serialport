@@ -38,8 +38,8 @@ interface Options {
     flowControl: null | 'Software' | 'Hardware';
     parity: null | 'Odd' | 'Even';
     stopBits: 1 | 2;
-    timeout: null | number;
     dtr: null | boolean;
+    timeout: null | number;
     [key: string]: any;
 }
 interface ReadOptions {
