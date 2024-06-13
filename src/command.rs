@@ -173,6 +173,7 @@ pub fn open<R: Runtime>(
                         serialport: serial,
                         sender: None,
                     };
+                    println!("DTR is {}", dtr.unwrap_or(false));
                     let _ = data
                         .serialport
                         .write_data_terminal_ready(dtr.unwrap_or(false));
@@ -203,7 +204,7 @@ pub fn read<R: Runtime>(
         } else {
             println!("Start reading data from serial port: {}", &path);
             match serialport_info.serialport.try_clone() {
-                Ok(mut serial) => {                    
+                Ok(mut serial) => {
                     let read_event = format!("plugin-serialport-read-{}", &path);
                     let (tx, rx): (Sender<usize>, Receiver<usize>) = mpsc::channel();
                     serialport_info.sender = Some(tx);
@@ -221,41 +222,41 @@ pub fn read<R: Runtime>(
                                 TryRecvError::Empty => {}
                             },
                         }
-                        
+
                         loop {
                             let mut serial_buf: Vec<u8> = vec![0; 0];
-                            loop{
-                            let pending_bytes = serial.bytes_to_read().unwrap_or(0) as usize;
-                            if pending_bytes == 0 {
-                                break;
-                            };
-                            serial_buf.resize(pending_bytes+serial_buf.len(), 0);
-                            let mut serial_buf: Vec<u8> = vec![0; pending_bytes];
-                            let serial_buf_len = serial_buf.len();
-                            match serial.read(&mut serial_buf[(serial_buf_len-pending_bytes)..]) {
-                                Ok(size) => {
-                                    println!(
-                                        "Serial port: {} Read data size v while: {}",
-                                        &path, size
-                                    );                                    
+                            loop {
+                                let pending_bytes = serial.bytes_to_read().unwrap_or(0) as usize;
+                                if pending_bytes == 0 {
+                                    break;
+                                };
+                                println!("Pending bytes: {}", pending_bytes);
+                                serial_buf.resize(pending_bytes + serial_buf.len(), 0);
+                                let mut serial_buf: Vec<u8> = vec![0; pending_bytes];
+                                let serial_buf_len = serial_buf.len();
+                                match serial
+                                    .read(&mut serial_buf[(serial_buf_len - pending_bytes)..])
+                                {
+                                    Ok(size) => {
+                                        println!(
+                                            "Serial port: {} Read data size v while: {}",
+                                            &path, size
+                                        );
+                                    }
+                                    Err(_err) => {}
                                 }
-                                Err(_err) => {}
+                                thread::sleep(Duration::from_millis(10));
                             }
-                            thread::sleep(Duration::from_millis(10));
-                            }
-                        if serial_buf.len()>0 {
-                            match app.emit(
-                                &read_event,                                
-                                serial_buf.clone(),
-                            ) {
-                                Ok(_) => {}
-                                Err(error) => {
-                                    println!("Failed to send data: {}", error)
+                            if serial_buf.len() > 0 {
+                                match app.emit(&read_event, serial_buf.clone()) {
+                                    Ok(_) => {println!("send data: {}", serial_buf.len())}
+                                    Err(error) => {
+                                        println!("Failed to send data: {}", error)
+                                    }
                                 }
                             }
+                            thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
                         }
-                        thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
-                    }
                     });
                 }
                 Err(error) => {
