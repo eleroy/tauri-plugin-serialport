@@ -173,7 +173,6 @@ pub fn open<R: Runtime>(
                         serialport: serial,
                         sender: None,
                     };
-                    println!("DTR is {}", dtr.unwrap_or(false));
                     let _ = data
                         .serialport
                         .write_data_terminal_ready(dtr.unwrap_or(false));
@@ -225,30 +224,23 @@ pub fn read<R: Runtime>(
 
                         loop {
                             let mut serial_buf: Vec<u8> = vec![0; 0];
+
+                            // Loop reading any available bytes with variable length buffer
                             loop {
                                 let pending_bytes = serial.bytes_to_read().unwrap_or(0) as usize;
                                 if pending_bytes == 0 {
                                     break;
                                 };
-                                println!("Pending bytes: {}", pending_bytes);
                                 serial_buf.resize(pending_bytes + serial_buf.len(), 0);
                                 let serial_buf_len = serial_buf.len();
-                                match serial
-                                    .read(&mut serial_buf[(serial_buf_len - pending_bytes)..])
-                                {
-                                    Ok(size) => {
-                                        println!(
-                                            "Serial port: {} Read data size v while: {}",
-                                            &path, size
-                                        );
-                                    }
-                                    Err(_err) => {}
-                                }
+                                let _ = serial
+                                    .read(&mut serial_buf[(serial_buf_len - pending_bytes)..]);
                                 thread::sleep(Duration::from_millis(10));
                             }
+                            // If anything has been read send it to the app
                             if serial_buf.len() > 0 {
                                 match app.emit(&read_event, serial_buf.clone()) {
-                                    Ok(_) => {println!("send data: {}", serial_buf.len())}
+                                    Ok(_) => {}
                                     Err(error) => {
                                         println!("Failed to send data: {}", error)
                                     }
