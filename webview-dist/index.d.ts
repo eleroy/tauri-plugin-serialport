@@ -1,4 +1,18 @@
 import { UnlistenFn } from '@tauri-apps/api/event';
+export interface SerialPortInfo {
+    port_name: string;
+    port_type: PortType;
+}
+export interface PortType {
+    UsbPort: UsbPort;
+}
+export interface UsbPort {
+    manufacturer: string;
+    pid: number;
+    product: string;
+    serial_number: string;
+    vid: number;
+}
 export interface InvokeResult {
     code: number;
     message: string;
@@ -24,7 +38,8 @@ interface Options {
     flowControl: null | 'Software' | 'Hardware';
     parity: null | 'Odd' | 'Even';
     stopBits: 1 | 2;
-    timeout: number;
+    timeout: null | number;
+    dtr: null | boolean;
     [key: string]: any;
 }
 interface ReadOptions {
@@ -42,7 +57,7 @@ declare class Serialport {
      * @description: 获取串口列表
      * @return {Promise<string[]>}
      */
-    static available_ports(): Promise<string[]>;
+    static available_ports(): Promise<SerialPortInfo[]>;
     /**
      * @description: 强制关闭
      * @param {string} path

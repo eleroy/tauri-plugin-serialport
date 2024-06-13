@@ -1,4 +1,3 @@
-use serde::Serialize;
 use serialport::{self, SerialPort};
 use std::{
     collections::HashMap,
@@ -13,11 +12,4 @@ pub struct SerialPortState {
 pub struct SerialPortStateInfo {
     pub serialport: Box<dyn SerialPort>,
     pub sender: Option<Sender<usize>>,
-}
-
-
-#[derive(Serialize, Clone)]
-pub struct ReadData<'a> {
-    pub data: &'a [u8],
-    pub size: usize,
 }

@@ -8,8 +8,6 @@ pub struct Result {
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
     #[error("{0}")]
     String(String),
 }

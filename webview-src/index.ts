@@ -2,6 +2,24 @@ import { UnlistenFn,listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrent } from '@tauri-apps/api/window';
 
+
+export interface SerialPortInfo {
+  port_name: string
+  port_type: PortType
+}
+
+export interface PortType {
+  UsbPort: UsbPort
+}
+
+export interface UsbPort {
+  manufacturer: string
+  pid: number
+  product: string
+  serial_number: string
+  vid: number
+}
+
 export interface InvokeResult {
   code: number;
   message: string;
@@ -67,9 +85,9 @@ class Serialport {
    * @description: 获取串口列表
    * @return {Promise<string[]>}
    */
-  static async available_ports(): Promise<string[]> {
+  static async available_ports(): Promise<SerialPortInfo[]> {
     try {
-      return await invoke<string[]>('plugin:serialport|available_ports');
+      return await invoke<SerialPortInfo[]>('plugin:serialport|available_ports');
     } catch (error) {
       return Promise.reject(error);
     }
@@ -182,16 +200,16 @@ class Serialport {
     try {
       await this.cancelListen();
       let readEvent = 'plugin-serialport-read-' + this.options.path;
-      this.unListen = await listen<ReadDataResult>(
+      this.unListen = await listen<number[]>(
         readEvent,
         ({ payload }) => {
           try {
             if (isDecode) {
               const decoder = new TextDecoder(this.encoding);
-              const data = decoder.decode(new Uint8Array(payload.data));
+              const data = decoder.decode(new Uint8Array(payload));
               fn(data);
             } else {
-              fn(new Uint8Array(payload.data));
+              fn(new Uint8Array(payload));
             }
           } catch (error) {
             console.error(error);
