@@ -76,7 +76,7 @@ class Serialport {
       flowControl: options.flowControl || "None",
       parity: options.parity || "None",
       stopBits: options.stopBits || "Two",
-      dtr:false,
+      dtr:options.dtr || false,
       timeout: options.timeout || 200,      
     };
     this.size = options.size || 1024;
