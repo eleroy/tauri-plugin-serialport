@@ -14,7 +14,8 @@ export default {
     nodeResolve(),
     terser(),
     typescript({
-      tsconfig: "./tsconfig.json",
+      declaration: true,
+      declarationDir: "./dist-js",
       moduleResolution: "node",
     }),
   ],

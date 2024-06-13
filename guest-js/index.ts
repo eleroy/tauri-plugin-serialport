@@ -35,7 +35,7 @@ interface ReadOptions {
   timeout?: number;
 }
 
-class SerialPort {
+export class SerialPort {
   isOpen: boolean;
   unListen?: UnlistenFn;
   encoding: string;
@@ -332,5 +332,3 @@ class SerialPort {
     }
   }
 }
-
-export { SerialPort as Serialport };
