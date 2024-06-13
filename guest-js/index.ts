@@ -21,12 +21,11 @@ export interface UsbPort {
 export interface SerialPortOptions {
   path: string;
   baudRate: number;
-  encoding?: string;
-  dataBits?: "Five" | "Six" | "Seven" | "Eight";
-  flowControl?: "None" | "Software" | "Hardware";
-  parity?: "None" | "Odd" | "Even";
-  stopBits?: "One" | "Two";
-  dtr?: boolean;
+  dataBits: "Five" | "Six" | "Seven" | "Eight";
+  flowControl: "None" | "Software" | "Hardware";
+  parity: "None" | "Odd" | "Even";
+  stopBits: "One" | "Two";
+  dtr: boolean;
   timeout?: number;
 }
 
@@ -42,7 +41,7 @@ export class SerialPort {
 
   constructor(options: SerialPortOptions) {
     this.isOpen = false;
-    this.encoding = options.encoding || "utf-8";
+    this.encoding = "utf-8";
     this.options = {
       path: options.path,
       baudRate: options.baudRate,
