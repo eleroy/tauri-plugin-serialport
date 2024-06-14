@@ -277,7 +277,9 @@ pub fn read<R: Runtime>(
                                     }
                                 }
                             }
-                            thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
+                            if serial.bytes_to_read().unwrap_or(0) == 0 {
+                                thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
+                            }
                         }
                     });
                 }
