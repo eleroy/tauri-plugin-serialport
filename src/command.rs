@@ -194,7 +194,7 @@ pub fn open<R: Runtime>(
                 .flow_control(flow_control.unwrap_or(FlowControl::None))
                 .parity(parity.unwrap_or(Parity::None))
                 .stop_bits(stop_bits.unwrap_or(StopBits::Two))
-                .timeout(Duration::from_millis(0))
+                .timeout(Duration::from_micros(500))
                 .open()
             {
                 Ok(serial) => {
