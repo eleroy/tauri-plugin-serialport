@@ -253,7 +253,6 @@ pub fn read<R: Runtime>(
 
                         loop {
                             let mut serial_buf: Vec<u8> = vec![0; 0];
-
                             // Loop reading any available bytes with variable length buffer
                             loop {
                                 let pending_bytes = serial.bytes_to_read().unwrap_or(0) as usize;
@@ -274,7 +273,7 @@ pub fn read<R: Runtime>(
                                     }
                                 }
                             }
-                            if serial.bytes_to_read().unwrap_or(0) == 0 {
+                            if serial.bytes_to_read().unwrap_or(0) == 0 { //If nothing is available on serial port wait to save CPU time
                                 thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
                             }
                         }
