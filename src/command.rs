@@ -194,7 +194,7 @@ pub fn open<R: Runtime>(
                 .flow_control(flow_control.unwrap_or(FlowControl::None))
                 .parity(parity.unwrap_or(Parity::None))
                 .stop_bits(stop_bits.unwrap_or(StopBits::Two))
-                .timeout(Duration::from_millis(timeout.unwrap_or(200)))
+                .timeout(Duration::from_millis(timeout.unwrap_or(1000)))
                 .open()
             {
                 Ok(serial) => {
@@ -264,7 +264,9 @@ pub fn read<R: Runtime>(
                                 let serial_buf_len = serial_buf.len();
                                 let _ = serial
                                     .read(&mut serial_buf[(serial_buf_len - pending_bytes)..]);
-                                thread::sleep(Duration::from_millis(10));
+                                if serial.bytes_to_read().unwrap_or(0) == 0 {
+                                    thread::sleep(Duration::from_millis(10));
+                                }
                             }
                             // If anything has been read send it to the app
                             if serial_buf.len() > 0 {
@@ -275,7 +277,9 @@ pub fn read<R: Runtime>(
                                     }
                                 }
                             }
-                            thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
+                            if serial.bytes_to_read().unwrap_or(0) == 0 {
+                                thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
+                            }
                         }
                     });
                 }
