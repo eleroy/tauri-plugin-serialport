@@ -263,10 +263,7 @@ pub fn read<R: Runtime>(
                                 serial_buf.resize(pending_bytes + serial_buf.len(), 0);
                                 let serial_buf_len = serial_buf.len();
                                 let _ = serial
-                                    .read(&mut serial_buf[(serial_buf_len - pending_bytes)..]);
-                                if serial.bytes_to_read().unwrap_or(0) == 0 {
-                                    thread::sleep(Duration::from_millis(10));
-                                }
+                                    .read(&mut serial_buf[(serial_buf_len - pending_bytes)..]);                                
                             }
                             // If anything has been read send it to the app
                             if serial_buf.len() > 0 {
