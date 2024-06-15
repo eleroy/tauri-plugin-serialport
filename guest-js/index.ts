@@ -50,7 +50,7 @@ export class SerialPort {
       parity: options.parity || "None",
       stopBits: options.stopBits || "Two",
       dtr: options.dtr || false,
-      timeout: options.timeout || 200,      
+      timeout: options.timeout || 200,
     };
   }
 
@@ -217,7 +217,7 @@ export class SerialPort {
         parity: this.options.parity,
         stopBits: this.options.stopBits,
         dtr: this.options.dtr,
-        timeout: this.options.timeout,       
+        timeout: this.options.timeout,
       });
       this.isOpen = true;
       return Promise.resolve(res);
