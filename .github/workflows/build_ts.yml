@@ -1,0 +1,14 @@
+on:
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch:
+
+jobs:
+  build_typescript:    
+    runs-on: ubuntu-22.04
+    steps:
+      - name: install
+        run: yarn install
+      - name: check build typescript
+        run: yarn build
