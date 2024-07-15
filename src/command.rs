@@ -9,7 +9,7 @@ use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
-use tauri::Manager;
+use tauri::Emitter;
 use tauri::{command, AppHandle, Runtime, State, Window};
 
 #[derive(Default)]
