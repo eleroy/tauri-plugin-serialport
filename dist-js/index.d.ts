@@ -16,11 +16,11 @@ export interface UsbPort {
 export interface SerialPortOptions {
     path: string;
     baudRate: number;
-    dataBits: "Five" | "Six" | "Seven" | "Eight";
-    flowControl: "None" | "Software" | "Hardware";
-    parity: "None" | "Odd" | "Even";
-    stopBits: "One" | "Two";
-    dtr: boolean;
+    dataBits?: "Five" | "Six" | "Seven" | "Eight";
+    flowControl?: "None" | "Software" | "Hardware";
+    parity?: "None" | "Odd" | "Even";
+    stopBits?: "One" | "Two";
+    dtr?: boolean;
     timeout?: number;
 }
 interface ReadOptions {
