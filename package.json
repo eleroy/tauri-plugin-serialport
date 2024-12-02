@@ -1,6 +1,6 @@
 {
   "name": "tauri-plugin-serialport-api",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "author": "eleroy <edoleroy@gmail.com>",
   "description": "A tauri plugin developed based on Serialport.",
   "type": "module",
@@ -27,6 +27,6 @@
     "typescript": "5.5.2"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.0.0-beta.13"
+    "@tauri-apps/api": "^2.0.0"
   }
 }

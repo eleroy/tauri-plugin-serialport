@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-serialport"
-version = "0.1.0"
+version = "2.0.0"
 authors = [ "lzhida","eleroy" ]
 description = "A tauri plugin developed based on Serialport."
 edition = "2021"
@@ -9,12 +9,12 @@ license = "MIT"
 links = "tauri-plugin-serialport"
 
 [build-dependencies]
-tauri-plugin = {version = "2.0.0-beta", features = [ "build" ] }
-tauri-build = "2.0.0-beta"
+tauri-plugin = {version = "2", features = [ "build" ] }
+tauri-build = "2"
 
 [dependencies]
 thiserror = "1"
 serde_json = "1"
-tauri = { version = "2.0.0-beta", features = [] }
+tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
-serialport = {version="4.3.0", features=["serde"]}
+serialport = {version="4.6.1", features=["serde"]}
