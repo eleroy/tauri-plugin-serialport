@@ -11,3 +11,4 @@ yarn.lock
 Cargo.lock
 node_modules/
 permissions/**
+.yarn/
