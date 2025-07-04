@@ -19,6 +19,7 @@
     "release": "release-it"
   },
   "devDependencies": {
+    "@release-it/bumper": "^7.0.5",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
@@ -43,6 +44,11 @@
     },
     "hooks": {
       "after:bump": "yarn build"
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": "cargo.toml"
+      }
     }
   }
 }
