@@ -40,6 +40,9 @@
     },
     "npm": {
       "publish": false
+    },
+    "hook": {
+      "after:bump": "yarn build"
     }
   }
 }

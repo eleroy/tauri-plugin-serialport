@@ -29,6 +29,8 @@ interface ReadOptions {
 export declare class SerialPort {
     isOpen: boolean;
     unListen?: UnlistenFn;
+    unListenCloseEvent?: UnlistenFn;
+    onClose?: CallableFunction;
     encoding: string;
     options: SerialPortOptions;
     constructor(options: SerialPortOptions);
