@@ -41,7 +41,7 @@
     "npm": {
       "publish": false
     },
-    "hook": {
+    "hooks": {
       "after:bump": "yarn build"
     }
   }
