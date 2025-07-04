@@ -244,6 +244,13 @@ pub fn read<R: Runtime>(
                             }
                             Err(error) => match error {
                                 TryRecvError::Disconnected => {
+                                    let close_event = format!("plugin-serialport-close-{}", &path);
+                                    match app.emit(&close_event, "") {
+                                        Ok(_) => {}
+                                        Err(error) => {
+                                            println!("Failed to send data: {}", error)
+                                        }
+                                    }
                                     println!("Disconnect from serial port {}", &path);
                                     break;
                                 }

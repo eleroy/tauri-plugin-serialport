@@ -36,6 +36,8 @@ interface ReadOptions {
 export class SerialPort {
   isOpen: boolean;
   unListen?: UnlistenFn;
+  unListenCloseEvent?: UnlistenFn;
+  onClose?: CallableFunction;
   encoding: string;
   options: SerialPortOptions;
 
@@ -61,7 +63,7 @@ export class SerialPort {
   static async available_ports(): Promise<SerialPortInfo[]> {
     try {
       return await invoke<SerialPortInfo[]>(
-        "plugin:serialport|available_ports",
+        "plugin:serialport|available_ports"
       );
     } catch (error) {
       return Promise.reject(error);
@@ -96,6 +98,10 @@ export class SerialPort {
       if (this.unListen) {
         this.unListen();
         this.unListen = undefined;
+      }
+      if (this.unListenCloseEvent) {
+        this.unListenCloseEvent();
+        this.unListenCloseEvent = undefined;
       }
       return;
     } catch (error) {
@@ -188,6 +194,15 @@ export class SerialPort {
           console.error(error);
         }
       });
+      let closeEvent = "plugin-serialport-close-" + this.options.path;
+      this.unListenCloseEvent = await listen<number[]>(
+        closeEvent,
+        async ({ payload }) => {
+          await this.cancelListen();
+          await this.close();
+          if (this.onClose) this.onClose();
+        }
+      );
       return;
     } catch (error) {
       return Promise.reject("Impossible to start listening: " + error);
@@ -322,7 +337,7 @@ export class SerialPort {
         });
       } else {
         return Promise.reject(
-          "value must be one of these types: string, Uint8Array, number[]",
+          "value must be one of these types: string, Uint8Array, number[]"
         );
       }
     } catch (error) {
