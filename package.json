@@ -1,6 +1,6 @@
 {
   "name": "tauri-plugin-serialport-api",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "author": "eleroy <edoleroy@gmail.com>",
   "description": "A tauri plugin developed based on Serialport.",
   "type": "module",
@@ -47,7 +47,11 @@
     },
     "plugins": {
       "@release-it/bumper": {
-        "out": "cargo.toml"
+        "out": {
+          "file": "Cargo.toml",
+          "type": "text/toml",
+          "path": "package.version"
+        }
       }
     }
   }
