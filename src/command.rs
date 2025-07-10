@@ -3,12 +3,12 @@ use serialport::{self, SerialPort};
 use serialport::{DataBits, FlowControl, Parity, SerialPortInfo, StopBits};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
-use std::{thread, usize};
 use std::time::Duration;
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
 };
+use std::{thread, usize};
 use tauri::Emitter;
 use tauri::{command, AppHandle, Runtime, State, Window};
 
@@ -263,16 +263,21 @@ pub fn read<R: Runtime>(
                             // Loop reading any available bytes with variable length buffer
                             loop {
                                 match serial.bytes_to_read() {
-                                    Ok(pending_bytes)=>{ 
+                                    Ok(pending_bytes) => {
                                         if pending_bytes == 0 {
-                                        break;
-                                    };
-                                    serial_buf.resize(pending_bytes as usize + serial_buf.len(), 0);
-                                    let serial_buf_len = serial_buf.len();
-                                    let _ = serial
-                                        .read(&mut serial_buf[(serial_buf_len - pending_bytes as usize)..]);}
-                                    Err(error) => {
-                                        let close_event = format!("plugin-serialport-close-{}", &path);
+                                            break;
+                                        };
+                                        serial_buf
+                                            .resize(pending_bytes as usize + serial_buf.len(), 0);
+                                        let serial_buf_len = serial_buf.len();
+                                        let _ = serial.read(
+                                            &mut serial_buf
+                                                [(serial_buf_len - pending_bytes as usize)..],
+                                        );
+                                    }
+                                    Err(_error) => {
+                                        let close_event =
+                                            format!("plugin-serialport-close-{}", &path);
                                         match app.emit(&close_event, "") {
                                             Ok(_) => {}
                                             Err(error) => {
@@ -283,8 +288,6 @@ pub fn read<R: Runtime>(
                                         break;
                                     }
                                 }
-                                let pending_bytes = serial.bytes_to_read().unwrap_or(0) as usize;
-                                                               
                             }
                             // If anything has been read send it to the app
                             if serial_buf.len() > 0 {
@@ -294,25 +297,9 @@ pub fn read<R: Runtime>(
                                         println!("Failed to send data: {}", error)
                                     }
                                 }
+                            } else {
+                                thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
                             }
-                            match serial.bytes_to_read() {
-                                Ok(pending_bytes)=>{ 
-                                    if pending_bytes == 0 {
-                                        thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));}
-                                }
-                                Err(error) => {
-                                    let close_event = format!("plugin-serialport-close-{}", &path);
-                                    match app.emit(&close_event, "") {
-                                        Ok(_) => {}
-                                        Err(error) => {
-                                            println!("Failed to send data: {}", error)
-                                        }
-                                    }
-                                    println!("Disconnect from serial port {}", &path);
-                                    break;
-                                }
-                            }
-                           
                         }
                     });
                 }
