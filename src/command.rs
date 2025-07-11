@@ -297,9 +297,9 @@ pub fn read<R: Runtime>(
                                         println!("Failed to send data: {}", error)
                                     }
                                 }
-                            } else {
-                                thread::sleep(Duration::from_millis(timeout.unwrap_or(10)));
                             }
+
+                            thread::sleep(Duration::from_millis(timeout.unwrap_or(1)));
                         }
                     });
                 }
