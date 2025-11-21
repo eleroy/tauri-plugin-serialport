@@ -38,7 +38,7 @@ For more details and usage see the example app. Please note, below in the depend
 ```toml
 [dependencies.tauri-plugin-serialport]
 git = "https://github.com/eleroy/tauri-plugin-serialport"
-version = "v0.1.0"
+version = "v2.1.0"
 ```
 
 Use in `src-tauri/src/main.rs`:
@@ -58,9 +58,9 @@ fn main() {
 
 
 ```
-npm install https://github.com/eleroy/tauri-plugin-serialport
+npm install tauri-plugin-serialport-api@https://github.com/eleroy/tauri-plugin-serialport
 # or
-yarn add https://github.com/eleroy/tauri-plugin-serialport
+yarn add tauri-plugin-serialport-api@https://github.com/eleroy/tauri-plugin-serialport
 ```
 
 ## USAGE

@@ -30,7 +30,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.3.0"
+    "@tauri-apps/api": "^2.9.0"
   },
   "packageManager": "yarn@4.9.2",
   "repository": "https://github.com/eleroy/tauri-plugin-serialport.git",

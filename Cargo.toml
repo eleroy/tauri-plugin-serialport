@@ -17,4 +17,4 @@ thiserror = "1"
 serde_json = "1"
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
-serialport = {version="4.7.0", features=["serde"]}
+serialport = {version="4.8.0", features=["serde"]}
