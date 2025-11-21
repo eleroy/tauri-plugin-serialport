@@ -257,7 +257,7 @@ pub fn read<R: Runtime>(
                                 TryRecvError::Empty => {}
                             },
                         }
-
+                        let mut connected = true;
                         loop {
                             let mut serial_buf: Vec<u8> = vec![0; 0];
                             // Loop reading any available bytes with variable length buffer
@@ -285,10 +285,12 @@ pub fn read<R: Runtime>(
                                             }
                                         }
                                         println!("Disconnect from serial port {}", &path);
+                                        connected = false;
                                         break;
                                     }
                                 }
                             }
+
                             // If anything has been read send it to the app
                             if serial_buf.len() > 0 {
                                 match app.emit(&read_event, serial_buf.clone()) {
@@ -298,7 +300,9 @@ pub fn read<R: Runtime>(
                                     }
                                 }
                             }
-
+                            if (!connected) {
+                                break;
+                            }
                             thread::sleep(Duration::from_millis(timeout.unwrap_or(1)));
                         }
                     });
